@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { useEMIStore } from '@/lib/store';
 
 type Theme = 'light' | 'dark';
 
@@ -12,85 +13,57 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function applyTheme(newTheme: Theme) {
+function applyThemeToDOM(newTheme: Theme) {
   if (typeof document === 'undefined') return;
   const html = document.documentElement;
   
   // Set data-theme attribute for CSS variables
   html.setAttribute('data-theme', newTheme);
   
-  // Also update class for compatibility
+  // Also update class for Tailwind compatibility
   html.classList.remove('dark', 'light');
-  if (newTheme === 'dark') {
-    html.classList.add('dark');
-  } else {
-    html.classList.add('light');
-  }
-  
-  localStorage.setItem('emi-theme', newTheme);
+  html.classList.add(newTheme);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  const [theme, setThemeState] = useState<Theme>('light');
+  
+  // Connect to Zustand store which now handles cross-tab sync automatically
+  const theme = useEMIStore((state) => state.theme);
+  const setThemeState = useEMIStore((state) => state.setTheme);
+  const toggleThemeState = useEMIStore((state) => state.toggleTheme);
 
   useEffect(() => {
-    // Get theme from localStorage or system preference
-    const savedTheme = localStorage.getItem('emi-theme') as Theme | null;
+    // Initial load: Apply system preference if store still has default 'light'
+    // but user prefers dark. (Store sync will overwrite this if needed).
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = (savedTheme || (prefersDark ? 'dark' : 'light')) as Theme;
-    
-    setThemeState(initialTheme);
-    applyTheme(initialTheme);
-    setMounted(true);
-    
-    // Listen for theme changes from other tabs
-    if (typeof BroadcastChannel !== 'undefined') {
-      try {
-        const channel = new BroadcastChannel('emi-theme-sync');
-        channel.onmessage = (event) => {
-          if (event.data.type === 'THEME_CHANGED') {
-            setThemeState(event.data.theme);
-            applyTheme(event.data.theme);
-          }
-        };
-        return () => channel.close();
-      } catch (e) {
-        // BroadcastChannel not supported
-      }
+    if (prefersDark && theme === 'light' && !mounted) {
+       setThemeState('dark');
     }
+    
+    setMounted(true);
   }, []);
+
+  // Apply theme to DOM whenever it changes in the store
+  useEffect(() => {
+    if (mounted) {
+      applyThemeToDOM(theme);
+    }
+  }, [theme, mounted]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-    applyTheme(newTheme);
-    
-    // Broadcast to other tabs
-    if (typeof BroadcastChannel !== 'undefined') {
-      try {
-        const channel = new BroadcastChannel('emi-theme-sync');
-        channel.postMessage({ type: 'THEME_CHANGED', theme: newTheme });
-        channel.close();
-      } catch (e) {
-        // BroadcastChannel not supported
-      }
-    }
-  }, []);
+  }, [setThemeState]);
 
   const toggleTheme = useCallback(() => {
-    setThemeState(prev => {
-      const newTheme = prev === 'light' ? 'dark' : 'light';
-      applyTheme(newTheme);
-      return newTheme;
-    });
-  }, []);
+    toggleThemeState();
+  }, [toggleThemeState]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-    {children}
+      {children}
     </ThemeContext.Provider>
   );
-
 }
 
 export function useTheme(): ThemeContextType {

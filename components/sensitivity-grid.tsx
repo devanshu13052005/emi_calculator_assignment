@@ -9,16 +9,22 @@ interface SensitivityGridProps {
 }
 
 export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProps) {
-  const rateVariations = [-2, -1, 0, 1, 2, 3, 4];
-  const tenureVariations = [
-    { label: '2 yr', months: 24 },
-    { label: '3 yr', months: 36 },
-    { label: '3 yr 6 mo', months: 42 },
-    { label: '4 yr', months: 48 },
-    { label: '4 yr 6 mo', months: 54 },
-    { label: '5 yr', months: 60 },
-    { label: '6 yr', months: 72 },
-  ];
+  // Use exact rate and tenure offsets as per assignment
+  const rateOffsets = [-3, -2, -1, 0, 1, 2, 3];
+  const tenureOffsets = [-24, -12, -6, 0, 6, 12, 24];
+
+  // Calculate actual bounds, clamp them, and deduplicate
+  const rateVariations = Array.from(new Set(
+    rateOffsets
+      .map(offset => rate + offset)
+      .map(r => Math.max(1, Math.min(36, r))) // Clamp to 1% - 36%
+  )).sort((a, b) => a - b);
+
+  const tenureVariations = Array.from(new Set(
+    tenureOffsets
+      .map(offset => tenure + offset)
+      .map(t => Math.max(1, Math.min(84, t))) // Clamp to 1 - 84 months
+  )).sort((a, b) => a - b);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -26,10 +32,17 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
       currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(value);
+    }).format(Math.round(value));
   };
 
-  const currentEMI = calculateEMI({ principal, rate, tenure }).emi;
+  const formatTenure = (months: number) => {
+    const y = Math.floor(months / 12);
+    const m = months % 12;
+    if (y > 0 && m > 0) return `${y} yr ${m} mo`;
+    if (y > 0) return `${y} yr`;
+    return `${m} mo`;
+  };
+
   const currentMonths = tenure;
 
   return (
@@ -44,34 +57,36 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
           <thead>
             <tr>
               <th className="text-left px-2 py-2 font-semibold text-foreground border-b border-border">Tenure \ Rate</th>
-              {rateVariations.map((variation) => (
+              {rateVariations.map((r) => (
                 <th
-                  key={variation}
-                  className="text-center px-2 py-2 font-semibold text-foreground border-b border-border whitespace-nowrap"
+                  key={r}
+                  className={`text-center px-2 py-2 font-semibold border-b border-border whitespace-nowrap ${
+                    r === rate ? 'text-primary' : 'text-foreground'
+                  }`}
                 >
-                  {rate + variation}%
+                  {r}%
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {tenureVariations.map((tenureItem) => (
-              <tr key={tenureItem.months}>
-                <td className="px-2 py-2 font-medium text-foreground border-b border-border whitespace-nowrap">
-                  {tenureItem.label}
+            {tenureVariations.map((t) => (
+              <tr key={t}>
+                <td className={`px-2 py-2 font-medium border-b border-border whitespace-nowrap ${
+                  t === currentMonths ? 'text-primary' : 'text-foreground'
+                }`}>
+                  {formatTenure(t)}
                 </td>
-                {rateVariations.map((rateVar) => {
-                  const newRate = rate + rateVar;
-                  const newTenure = tenureItem.months;
-                  const emi = calculateEMI({ principal, rate: newRate, tenure: newTenure }).emi;
-                  const isCurrent = Math.abs(newRate - rate) < 0.1 && newTenure === currentMonths;
+                {rateVariations.map((r) => {
+                  const emi = calculateEMI({ principal, rate: r, tenure: t }).emi;
+                  const isCurrent = Math.abs(r - rate) < 0.01 && t === currentMonths;
 
                   return (
                     <td
-                      key={`${tenureItem.months}-${rateVar}`}
+                      key={`${t}-${r}`}
                       className={`text-center px-2 py-2 border-b border-border ${
                         isCurrent
-                          ? 'bg-primary/10 text-primary font-semibold rounded'
+                          ? 'bg-primary/20 text-primary font-bold rounded shadow-inner'
                           : 'text-muted-foreground hover:bg-muted/50'
                       }`}
                     >

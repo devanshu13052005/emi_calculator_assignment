@@ -1,24 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useEMIStore } from '@/lib/store';
 import { SingleEMIMode } from '@/components/single-emi';
 import { ComparisonEMIMode } from '@/components/comparison-emi';
 import { PrepaymentEMIMode } from '@/components/prepayment-emi';
 import { BonusFeatures } from '@/components/bonus-features';
 import { AppNavbar } from '@/components/app-navbar';
-import { initializeCrossTabSync } from '@/lib/sync';
 import { loadStateFromUrl } from '@/lib/url-state';
+import { useTabSync } from '@/lib/useTabSync';
+import { useTabIdentity } from '@/lib/useTabIdentity';
 
 export default function Page() {
   const store = useEMIStore();
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize Tab Identity (gets Tab A/B, leader status, active count)
+  const { tabId, activeTabCount, isLeader } = useTabIdentity();
+  
+  // Initialize Cross-Tab State Sync
+  useTabSync(tabId);
 
   useEffect(() => {
+    setMounted(true);
     // Load state from URL if present
     loadStateFromUrl();
-
-    // Initialize cross-tab sync
-    initializeCrossTabSync();
   }, []);
 
   return (
@@ -66,9 +72,13 @@ export default function Page() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {store.activeTab === 'single' && <SingleEMIMode />}
-        {store.activeTab === 'compare' && <ComparisonEMIMode />}
-        {store.activeTab === 'prepayment' && <PrepaymentEMIMode />}
+        {mounted && (
+          <>
+            {store.activeTab === 'single' && <SingleEMIMode />}
+            {store.activeTab === 'compare' && <ComparisonEMIMode />}
+            {store.activeTab === 'prepayment' && <PrepaymentEMIMode />}
+          </>
+        )}
       </div>
 
       {/* Bonus Features */}

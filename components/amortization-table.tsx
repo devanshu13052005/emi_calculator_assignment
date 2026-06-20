@@ -9,19 +9,12 @@ interface AmortizationTableProps {
 }
 
 export function AmortizationTable({ schedule }: AmortizationTableProps) {
-  const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [itemsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(schedule.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const displayedSchedule = schedule.slice(startIndex, startIndex + itemsPerPage);
-
-  const toggleExpanded = (month: number) => {
-    setExpandedRows((prev) =>
-      prev.includes(month) ? prev.filter((m) => m !== month) : [...prev, month]
-    );
-  };
 
   if (schedule.length === 0) {
     return (
@@ -38,35 +31,39 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
         <table className="w-full text-sm">
           <thead className="bg-muted">
             <tr className="border-b border-border">
-              <th className="px-4 py-3 text-left font-medium text-foreground">
-                Month
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">
-                EMI
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">
-                Principal
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">
-                Interest
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">
-                Balance
-              </th>
+              <th className="px-4 py-3 text-left font-medium text-foreground">Month</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground">EMI</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground">Principal</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground">Interest</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground">Balance</th>
             </tr>
           </thead>
           <tbody>
-            {displayedSchedule.map((row, idx) => (
+            {displayedSchedule.map((row) => (
               <tr
                 key={row.month}
-                className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
-                onClick={() => toggleExpanded(row.month)}
+                className={`border-b border-border transition-colors ${
+                  row.isBreakEven
+                    ? 'bg-primary/20 hover:bg-primary/30 border-primary shadow-inner'
+                    : 'hover:bg-muted/50'
+                }`}
+                title={row.isBreakEven ? 'Break-even month: Cumulative Principal repaid first exceeds Cumulative Interest paid' : undefined}
               >
-                <td className="px-4 py-3 font-medium text-foreground">
+                <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2">
                   {row.month}
+                  {row.isBreakEven && (
+                    <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded uppercase font-bold">
+                      Break-even
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right text-foreground font-medium">
-                  {formatCurrency(row.emi)}
+                  {formatCurrency(row.emi + (row.prepaymentAmount || 0))}
+                  {row.prepaymentAmount > 0 && (
+                    <span className="block text-xs text-green-600 dark:text-green-400 mt-1">
+                      + {formatCurrency(row.prepaymentAmount)} prepay
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right text-accent">
                   {formatCurrency(row.principalPayment)}

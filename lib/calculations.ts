@@ -10,8 +10,10 @@ import {
 
 /**
  * Calculate standard EMI using the formula:
- * EMI = P * r * (1 + r)^n / ((1 + r)^n - 1)
+ * EMI = P × r × (1 + r)^n / ((1 + r)^n − 1)
  * where P = principal, r = monthly rate, n = number of months
+ *
+ * Special case: if rate === 0, then EMI = P / n
  */
 export function calculateEMI(input: EMIInput): EMIOutput {
   const { principal, rate, tenure } = input;
@@ -22,6 +24,8 @@ export function calculateEMI(input: EMIInput): EMIOutput {
       emi: 0,
       totalAmount: principal,
       totalInterest: 0,
+      principalPercent: 100,
+      interestPercent: 0,
     };
   }
 
@@ -32,100 +36,173 @@ export function calculateEMI(input: EMIInput): EMIOutput {
       emi,
       totalAmount: principal,
       totalInterest: 0,
+      principalPercent: 100,
+      interestPercent: 0,
     };
   }
 
-  const monthlyRate = rate / 100 / 12;
-  const numerator = principal * monthlyRate * Math.pow(1 + monthlyRate, tenure);
-  const denominator = Math.pow(1 + monthlyRate, tenure) - 1;
+  const monthlyRate = rate / 12 / 100;
+  const powerTerm = Math.pow(1 + monthlyRate, tenure);
+  const numerator = principal * monthlyRate * powerTerm;
+  const denominator = powerTerm - 1;
   const emi = numerator / denominator;
 
   const totalAmount = emi * tenure;
   const totalInterest = totalAmount - principal;
 
+  // Percentages based on total payable (NOT on principal)
+  const principalPercent = (principal / totalAmount) * 100;
+  const interestPercent = (totalInterest / totalAmount) * 100;
+
   return {
-    emi: Number(emi.toFixed(2)),
-    totalAmount: Number(totalAmount.toFixed(2)),
-    totalInterest: Number(totalInterest.toFixed(2)),
+    emi,
+    totalAmount,
+    totalInterest,
+    principalPercent,
+    interestPercent,
   };
 }
 
 /**
- * Generate complete amortization schedule
+ * Generate complete amortization schedule using reducing-balance method.
+ *
+ * Prepayment strategy: reduce-tenure (EMI stays fixed, loan ends sooner).
+ * Prepayments are applied at the START of the scheduled month, BEFORE interest
+ * is charged on the remaining balance.
+ *
+ * Edge cases handled:
+ * - Prepayment > remaining balance → capped at balance, loan ends that month
+ * - Multiple prepayments in same month → summed
+ * - Prepayment month > tenure → ignored
  */
 export function generateAmortizationSchedule(
   input: EMIInput,
   prepayments: PrepaymentEntry[] = []
 ): AmortizationRow[] {
   const { principal, rate, tenure } = input;
-  const monthlyRate = rate / 100 / 12;
+  const monthlyRate = rate / 12 / 100;
   const emiOutput = calculateEMI(input);
   const emi = emiOutput.emi;
 
   const schedule: AmortizationRow[] = [];
   let balance = principal;
-  let month = 1;
+  let cumulativePrincipal = 0;
+  let cumulativeInterest = 0;
+  let breakEvenFound = false;
 
-  // Create a map for quick prepayment lookup
-  const prepaymentMap = new Map(prepayments.map((p) => [p.month, p.amount]));
+  // Aggregate prepayments by month (sum multiple entries for same month)
+  const prepaymentMap = new Map<number, number>();
+  for (const p of prepayments) {
+    const existing = prepaymentMap.get(p.month) || 0;
+    prepaymentMap.set(p.month, existing + p.amount);
+  }
 
-  while (balance > 0 && month <= tenure * 2) {
-    // Safety check to prevent infinite loops
-    const interestPayment = Number((balance * monthlyRate).toFixed(2));
-    let principalPayment = Number((emi - interestPayment).toFixed(2));
+  for (let month = 1; month <= tenure * 2 && balance > 0.01; month++) {
+    // Step 1: Apply prepayment FIRST, before interest is charged
+    let prepaymentAmount = prepaymentMap.get(month) || 0;
+    // Cap prepayment at remaining balance
+    prepaymentAmount = Math.min(prepaymentAmount, balance);
+    balance = balance - prepaymentAmount;
 
-    // Handle prepayment if any
-    const prepaymentAmount = prepaymentMap.get(month) || 0;
-    principalPayment += prepaymentAmount;
+    // If prepayment wiped out the balance entirely
+    if (balance <= 0.01) {
+      cumulativePrincipal += prepaymentAmount;
 
-    // Adjust for final payment
-    if (balance - principalPayment < 0.01) {
+      const isBreakEven = !breakEvenFound && cumulativePrincipal >= cumulativeInterest;
+      if (isBreakEven) breakEvenFound = true;
+
+      schedule.push({
+        month,
+        principalPayment: 0,
+        interestPayment: 0,
+        prepaymentAmount,
+        emi: 0,
+        balance: 0,
+        cumulativePrincipal,
+        cumulativeInterest,
+        isBreakEven,
+      });
+      break;
+    }
+
+    // Step 2: Calculate interest on the (possibly reduced) balance
+    const interestPayment = balance * monthlyRate;
+    let principalPayment = emi - interestPayment;
+
+    // Adjust for final payment — if principal portion exceeds balance
+    if (principalPayment >= balance) {
       principalPayment = balance;
     }
 
-    balance = Number((balance - principalPayment).toFixed(2));
+    balance = balance - principalPayment;
+    if (balance < 0.01) balance = 0;
+
+    cumulativePrincipal += principalPayment + prepaymentAmount;
+    cumulativeInterest += interestPayment;
+
+    const isBreakEven = !breakEvenFound && cumulativePrincipal >= cumulativeInterest;
+    if (isBreakEven) breakEvenFound = true;
 
     schedule.push({
       month,
       principalPayment,
       interestPayment,
-      emi: Number((interestPayment + principalPayment).toFixed(2)),
+      prepaymentAmount,
+      emi: interestPayment + principalPayment,
       balance: Math.max(0, balance),
+      cumulativePrincipal,
+      cumulativeInterest,
+      isBreakEven,
     });
 
     if (balance <= 0) break;
-    month++;
   }
 
   return schedule;
 }
 
 /**
- * Calculate prepayment impact
+ * Calculate prepayment impact by comparing original vs prepayment schedules.
+ *
+ * interestSaved = originalTotalInterest - newTotalInterest
+ * tenureReduced = originalSchedule.length - prepaymentSchedule.length
  */
 export function calculatePrepayment(
   input: EMIInput,
   prepayments: PrepaymentEntry[]
 ): PrepaymentResult {
   const originalOutput = calculateEMI(input);
-  const schedule = generateAmortizationSchedule(input, prepayments);
+  const originalSchedule = generateAmortizationSchedule(input, []);
+  const prepaymentSchedule = generateAmortizationSchedule(input, prepayments);
 
-  const newTenure = schedule.length;
-  const originalTenure = input.tenure;
-  const totalAmount = schedule.reduce((sum, row) => sum + row.emi, 0);
-  const totalInterest = schedule.reduce((sum, row) => sum + row.interestPayment, 0);
+  const originalTotalInterest = originalSchedule.reduce(
+    (sum, row) => sum + row.interestPayment,
+    0
+  );
+  const newTotalInterest = prepaymentSchedule.reduce(
+    (sum, row) => sum + row.interestPayment,
+    0
+  );
+
+  const originalTenure = originalSchedule.length;
+  const newTenure = prepaymentSchedule.length;
+
+  const newTotalAmount = prepaymentSchedule.reduce(
+    (sum, row) => sum + row.emi + row.prepaymentAmount,
+    0
+  );
 
   return {
     emi: originalOutput.emi,
-    totalAmount: Number(totalAmount.toFixed(2)),
-    totalInterest: Number(totalInterest.toFixed(2)),
+    totalAmount: newTotalAmount,
+    totalInterest: newTotalInterest,
+    principalPercent: originalOutput.principalPercent,
+    interestPercent: originalOutput.interestPercent,
     originalTenure,
     newTenure,
     tenureReduction: originalTenure - newTenure,
-    interestSavings: Number(
-      (originalOutput.totalInterest - totalInterest).toFixed(2)
-    ),
-    amortizationSchedule: schedule,
+    interestSavings: originalTotalInterest - newTotalInterest,
+    amortizationSchedule: prepaymentSchedule,
   };
 }
 
@@ -174,15 +251,16 @@ export function compareThreeLoans(
 }
 
 /**
- * Format currency for display
+ * Format currency for display using Indian number system.
+ * All values rounded to nearest integer at display time.
  */
 export function formatCurrency(amount: number, locale = 'en-IN'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'INR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
+    maximumFractionDigits: 0,
+  }).format(Math.round(amount));
 }
 
 /**

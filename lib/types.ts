@@ -9,14 +9,20 @@ export interface EMIOutput {
   emi: number; // Monthly EMI amount
   totalAmount: number; // Total amount to be paid
   totalInterest: number; // Total interest amount
+  principalPercent: number; // Principal share %
+  interestPercent: number; // Interest share %
 }
 
 export interface AmortizationRow {
   month: number;
   principalPayment: number;
   interestPayment: number;
+  prepaymentAmount: number;
   emi: number;
   balance: number;
+  cumulativePrincipal: number;
+  cumulativeInterest: number;
+  isBreakEven: boolean;
 }
 
 // Comparison Mode Types
@@ -69,6 +75,9 @@ export interface AppState {
   activeTab: 'single' | 'compare' | 'prepayment';
   comparisonCount: number; // 2 or 3
 
+  // Theme
+  theme: 'light' | 'dark';
+
   // Undo/Redo History
   history: AppState[];
   historyIndex: number;
@@ -79,6 +88,14 @@ export interface AppState {
   // Tab Leadership
   isTabLeader: boolean;
   lastUpdate: number; // timestamp
+}
+
+// Cross-Tab Sync Message
+export interface SyncMessage {
+  type: 'STATE_UPDATE' | 'REQUEST_STATE' | 'STATE_RESPONSE' | 'HEARTBEAT';
+  senderId: string;
+  payload?: Partial<AppState>;
+  timestamp: number;
 }
 
 // Action Types for Store

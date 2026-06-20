@@ -75,12 +75,7 @@ export function EMIOutputComponent({ output, title = 'EMI Summary' }: EMIOutputP
         <div className="flex justify-between text-sm text-xs pt-2">
           <span className="text-muted-foreground">Interest %:</span>
           <span className="font-medium text-foreground">
-            {formatNumber(
-              (output.totalInterest / (output.totalAmount - output.totalInterest)) *
-                100,
-              2
-            )}
-            %
+            {formatNumber(output.interestPercent, 2)}%
           </span>
         </div>
       </div>
