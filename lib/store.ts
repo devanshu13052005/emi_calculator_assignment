@@ -1,0 +1,309 @@
+'use client';
+
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { AppState, EMIInput, ComparisonLoan, PrepaymentEntry } from './types';
+import {
+  calculateEMI,
+  compareTwoLoans,
+  calculatePrepayment,
+} from './calculations';
+
+const DEFAULT_SINGLE_LOAN: EMIInput = {
+  principal: 1000000,
+  rate: 8.5,
+  tenure: 120, // 10 years in months
+};
+
+const DEFAULT_COMPARISON_LOAN: ComparisonLoan = {
+  id: '',
+  name: '',
+  principal: 1000000,
+  rate: 8.5,
+  tenure: 120, // 10 years in months
+};
+
+const INITIAL_STATE: AppState = {
+  singleLoan: DEFAULT_SINGLE_LOAN,
+  singleOutput: calculateEMI(DEFAULT_SINGLE_LOAN),
+
+  comparisonLoans: [],
+  comparisonResults: null,
+
+  prepaymentLoan: DEFAULT_SINGLE_LOAN,
+  prepaymentEntries: [],
+  prepaymentResult: null,
+
+  activeTab: 'single',
+  comparisonCount: 2,
+
+  history: [],
+  historyIndex: -1,
+
+  urlState: null,
+  isTabLeader: false,
+  lastUpdate: Date.now(),
+};
+
+interface StoreActions {
+  // Single EMI Mode
+  updateSingleLoan: (updates: Partial<EMIInput>) => void;
+  resetSingleLoan: () => void;
+
+  // Comparison Mode
+  updateComparisonLoans: (loans: ComparisonLoan[]) => void;
+  updateComparisonLoan: (id: string, updates: Partial<ComparisonLoan>) => void;
+  addComparisonLoan: () => void;
+  removeComparisonLoan: (id: string) => void;
+  setComparisonCount: (count: 2 | 3) => void;
+
+  // Prepayment Mode
+  updatePrepaymentLoan: (updates: Partial<EMIInput>) => void;
+  updatePrepaymentEntries: (entries: PrepaymentEntry[]) => void;
+  addPrepaymentEntry: (entry: PrepaymentEntry) => void;
+  removePrepaymentEntry: (month: number) => void;
+
+  // Tab Navigation
+  setActiveTab: (tab: 'single' | 'compare' | 'prepayment') => void;
+
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+  clearHistory: () => void;
+
+  // URL State
+  setUrlState: (state: string) => void;
+  loadFromUrl: (state: string) => void;
+
+  // Tab Leadership
+  setTabLeader: (isLeader: boolean) => void;
+  updateLastUpdate: () => void;
+
+  // General
+  resetState: () => void;
+}
+
+type PartialAppState = Omit<
+  AppState,
+  'history' | 'historyIndex' | 'isTabLeader' | 'lastUpdate'
+>;
+
+export const useEMIStore = create<AppState & StoreActions>()(
+  persist(
+    (set, get) => ({
+      ...INITIAL_STATE,
+
+      // Single EMI Mode
+      updateSingleLoan: (updates) =>
+        set((state) => {
+          const newLoan = { ...state.singleLoan, ...updates };
+          return {
+            singleLoan: newLoan,
+            singleOutput: calculateEMI(newLoan),
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      resetSingleLoan: () =>
+        set({
+          singleLoan: DEFAULT_SINGLE_LOAN,
+          singleOutput: calculateEMI(DEFAULT_SINGLE_LOAN),
+        }),
+
+      // Comparison Mode
+      updateComparisonLoans: (loans) =>
+        set((state) => {
+          const comparisonResults =
+            loans.length === 2 ? compareTwoLoans(loans[0], loans[1]) : null;
+          return {
+            comparisonLoans: loans,
+            comparisonResults,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      updateComparisonLoan: (id, updates) =>
+        set((state) => {
+          const newLoans = state.comparisonLoans.map((loan) =>
+            loan.id === id ? { ...loan, ...updates } : loan
+          );
+          const comparisonResults =
+            newLoans.length === 2
+              ? compareTwoLoans(newLoans[0], newLoans[1])
+              : null;
+          return {
+            comparisonLoans: newLoans,
+            comparisonResults,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      addComparisonLoan: () =>
+        set((state) => {
+          const newId = `loan-${Date.now()}`;
+          const loanCount = state.comparisonLoans.length + 1;
+          const newLoans = [
+            ...state.comparisonLoans,
+            { ...DEFAULT_COMPARISON_LOAN, id: newId, name: `Loan ${loanCount}` },
+          ];
+          return {
+            comparisonLoans: newLoans,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      removeComparisonLoan: (id) =>
+        set((state) => {
+          const newLoans = state.comparisonLoans.filter((loan) => loan.id !== id);
+          const comparisonResults =
+            newLoans.length === 2
+              ? compareTwoLoans(newLoans[0], newLoans[1])
+              : null;
+          return {
+            comparisonLoans: newLoans,
+            comparisonResults,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      setComparisonCount: (count) =>
+        set({
+          comparisonCount: count,
+          comparisonLoans: [],
+          comparisonResults: null,
+        }),
+
+      // Prepayment Mode
+      updatePrepaymentLoan: (updates) =>
+        set((state) => {
+          const newLoan = { ...state.prepaymentLoan, ...updates };
+          const prepaymentResult = calculatePrepayment(
+            newLoan,
+            state.prepaymentEntries
+          );
+          return {
+            prepaymentLoan: newLoan,
+            prepaymentResult,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      updatePrepaymentEntries: (entries) =>
+        set((state) => {
+          const prepaymentResult = calculatePrepayment(
+            state.prepaymentLoan,
+            entries
+          );
+          return {
+            prepaymentEntries: entries,
+            prepaymentResult,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      addPrepaymentEntry: (entry) =>
+        set((state) => {
+          const newEntries = [...state.prepaymentEntries, entry];
+          const prepaymentResult = calculatePrepayment(
+            state.prepaymentLoan,
+            newEntries
+          );
+          return {
+            prepaymentEntries: newEntries,
+            prepaymentResult,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      removePrepaymentEntry: (month) =>
+        set((state) => {
+          const newEntries = state.prepaymentEntries.filter((e) => e.month !== month);
+          const prepaymentResult = calculatePrepayment(
+            state.prepaymentLoan,
+            newEntries
+          );
+          return {
+            prepaymentEntries: newEntries,
+            prepaymentResult,
+            lastUpdate: Date.now(),
+          };
+        }),
+
+      // Tab Navigation
+      setActiveTab: (tab) => set({ activeTab: tab }),
+
+      // Undo/Redo (simplified version)
+      undo: () => {
+        const state = get();
+        if (state.historyIndex > 0) {
+          const previousState = state.history[state.historyIndex - 1];
+          set({
+            historyIndex: state.historyIndex - 1,
+            ...previousState,
+          });
+        }
+      },
+
+      redo: () => {
+        const state = get();
+        if (state.historyIndex < state.history.length - 1) {
+          const nextState = state.history[state.historyIndex + 1];
+          set({
+            historyIndex: state.historyIndex + 1,
+            ...nextState,
+          });
+        }
+      },
+
+      clearHistory: () =>
+        set({
+          history: [],
+          historyIndex: -1,
+        }),
+
+      // URL State
+      setUrlState: (urlState) => set({ urlState }),
+
+      loadFromUrl: (urlState) => {
+        try {
+          const decoded = JSON.parse(
+            atob(urlState)
+          ) as Partial<PartialAppState>;
+          set({
+            singleLoan: decoded.singleLoan || INITIAL_STATE.singleLoan,
+            singleOutput: decoded.singleOutput || INITIAL_STATE.singleOutput,
+            activeTab: decoded.activeTab || 'single',
+            lastUpdate: Date.now(),
+          });
+        } catch (e) {
+          console.error('Failed to load state from URL', e);
+        }
+      },
+
+      // Tab Leadership
+      setTabLeader: (isLeader) => set({ isTabLeader: isLeader }),
+      updateLastUpdate: () => set({ lastUpdate: Date.now() }),
+
+      // General
+      resetState: () => set(INITIAL_STATE),
+    }),
+    {
+      name: 'emi-workspace',
+      version: 1,
+    }
+  )
+);
+
+// Add support for REPLACE_STATE action for cross-tab sync
+declare global {
+  interface Window {
+    emiStoreReplace?: (state: AppState) => void;
+  }
+}
+
+// Make the store action handler available globally
+if (typeof window !== 'undefined') {
+  window.emiStoreReplace = (state: AppState) => {
+    // This will be used by the sync mechanism to replace entire state
+  };
+}
