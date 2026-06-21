@@ -16,8 +16,8 @@ export function ComparisonEMIMode() {
       const id1 = `loan-${Date.now()}-1`;
       const id2 = `loan-${Date.now()}-2`;
       store.updateComparisonLoans([
-        { ...store.singleLoan, id: id1, name: 'Conservative' },
-        { ...store.singleLoan, id: id2, name: 'Aggressive' },
+        { ...store.singleLoan, id: id1, name: 'Conservative', tenure: 60 },
+        { ...store.singleLoan, id: id2, name: 'Aggressive', tenure: 24 },
       ]);
     }
   }, []);

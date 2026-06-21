@@ -241,4 +241,8 @@ input[type="range"]::-moz-range-track {
   html {
     @apply font-sans;
   }
+  
+  .dark input:not([type="range"]) {
+    border-color: #3d4266;
+  }
 }
