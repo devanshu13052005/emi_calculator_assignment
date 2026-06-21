@@ -53,10 +53,18 @@ export function SyncedSlider({
   };
 
   const handleInputBlur = () => {
-    // Reset to last valid value if input is empty or invalid
-    if (inputValue === '' || isNaN(parseFloat(inputValue))) {
-      setInputValue(value.toString());
+    // Clamp to min/max or reset if invalid
+    let validValue = parseFloat(inputValue);
+    if (isNaN(validValue)) {
+      validValue = value;
+    } else if (validValue > max) {
+      validValue = max;
+    } else if (validValue < min) {
+      validValue = min;
     }
+    
+    onChange(validValue);
+    setInputValue(validValue.toString());
   };
 
   const percentage = ((value - min) / (max - min)) * 100;

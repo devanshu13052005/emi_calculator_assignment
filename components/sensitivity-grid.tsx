@@ -43,51 +43,44 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
     return `${m} mo`;
   };
 
-  const currentMonths = tenure;
-
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
+    <div className="bg-card dark:bg-muted border border-border rounded-lg p-6 overflow-x-auto">
       <div className="mb-4">
-        <h4 className="text-sm font-medium text-foreground mb-1">Sensitivity Analysis</h4>
-        <p className="text-xs text-muted-foreground">EMI across rate × tenure – current values highlighted</p>
+        <h3 className="text-lg font-semibold text-foreground">Sensitivity Analysis</h3>
+        <p className="text-sm text-muted-foreground">See how your EMI changes with different rates and tenures</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="min-w-[600px]">
+        <table className="w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th className="text-left px-2 py-2 font-semibold text-foreground border-b border-border">Tenure \ Rate</th>
-              {rateVariations.map((r) => (
-                <th
-                  key={r}
-                  className={`text-center px-2 py-2 font-semibold border-b border-border whitespace-nowrap ${
-                    r === rate ? 'text-primary' : 'text-foreground'
-                  }`}
-                >
-                  {r}%
+              <th className="p-2 border border-border bg-muted text-muted-foreground font-medium text-left">
+                Rate \ Tenure
+              </th>
+              {tenureVariations.map((t) => (
+                <th key={t} className="p-2 border border-border bg-muted text-muted-foreground font-medium text-center">
+                  {formatTenure(t)} {t === tenure ? '(Current)' : ''}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {tenureVariations.map((t) => (
-              <tr key={t}>
-                <td className={`px-2 py-2 font-medium border-b border-border whitespace-nowrap ${
-                  t === currentMonths ? 'text-primary' : 'text-foreground'
-                }`}>
-                  {formatTenure(t)}
-                </td>
-                {rateVariations.map((r) => {
-                  const emi = calculateEMI({ principal, rate: r, tenure: t }).emi;
-                  const isCurrent = Math.abs(r - rate) < 0.01 && t === currentMonths;
-
+            {rateVariations.map((r) => (
+              <tr key={r}>
+                <th className="p-2 border border-border bg-muted text-muted-foreground font-medium text-left">
+                  {r.toFixed(1)}% {r === rate ? '(Current)' : ''}
+                </th>
+                {tenureVariations.map((t) => {
+                  const isCurrent = t === tenure && r === rate;
+                  const { emi } = calculateEMI({ principal, rate: r, tenure: t });
+                  
                   return (
-                    <td
-                      key={`${t}-${r}`}
-                      className={`text-center px-2 py-2 border-b border-border ${
-                        isCurrent
-                          ? 'bg-primary/20 text-primary font-bold rounded shadow-inner'
-                          : 'text-muted-foreground hover:bg-muted/50'
+                    <td 
+                      key={`${r}-${t}`}
+                      className={`p-2 border border-border text-center transition-colors ${
+                        isCurrent 
+                          ? 'bg-primary text-primary-foreground font-bold shadow-sm' 
+                          : 'hover:bg-muted/50 text-foreground'
                       }`}
                     >
                       {formatCurrency(emi)}

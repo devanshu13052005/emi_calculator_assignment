@@ -11,7 +11,7 @@ import {
 const DEFAULT_SINGLE_LOAN: EMIInput = {
   principal: 1000000,
   rate: 8.5,
-  tenure: 120, // 10 years in months
+  tenure: 48, // 4 years in months (max 84)
 };
 
 const DEFAULT_COMPARISON_LOAN: ComparisonLoan = {
@@ -19,7 +19,7 @@ const DEFAULT_COMPARISON_LOAN: ComparisonLoan = {
   name: '',
   principal: 1000000,
   rate: 8.5,
-  tenure: 120, // 10 years in months
+  tenure: 60, // 5 years in months
 };
 
 const INITIAL_STATE: AppState = {
@@ -98,7 +98,11 @@ export const useEMIStore = create<AppState & StoreActions>()(
     // Single EMI Mode
     updateSingleLoan: (updates) =>
       set((state) => {
-        const newLoan = { ...state.singleLoan, ...updates };
+        let newTenure = updates.tenure;
+        if (newTenure !== undefined) {
+          newTenure = Math.min(84, Math.max(1, Math.round(newTenure)));
+        }
+        const newLoan = { ...state.singleLoan, ...updates, ...(newTenure !== undefined && { tenure: newTenure }) };
         return {
           singleLoan: newLoan,
           singleOutput: calculateEMI(newLoan),
@@ -126,8 +130,12 @@ export const useEMIStore = create<AppState & StoreActions>()(
 
     updateComparisonLoan: (id, updates) =>
       set((state) => {
+        let newTenure = updates.tenure;
+        if (newTenure !== undefined) {
+          newTenure = Math.min(84, Math.max(1, Math.round(newTenure)));
+        }
         const newLoans = state.comparisonLoans.map((loan) =>
-          loan.id === id ? { ...loan, ...updates } : loan
+          loan.id === id ? { ...loan, ...updates, ...(newTenure !== undefined && { tenure: newTenure }) } : loan
         );
         const comparisonResults =
           newLoans.length === 2
@@ -178,7 +186,11 @@ export const useEMIStore = create<AppState & StoreActions>()(
     // Prepayment Mode
     updatePrepaymentLoan: (updates) =>
       set((state) => {
-        const newLoan = { ...state.prepaymentLoan, ...updates };
+        let newTenure = updates.tenure;
+        if (newTenure !== undefined) {
+          newTenure = Math.min(84, Math.max(1, Math.round(newTenure)));
+        }
+        const newLoan = { ...state.prepaymentLoan, ...updates, ...(newTenure !== undefined && { tenure: newTenure }) };
         const prepaymentResult = calculatePrepayment(
           newLoan,
           state.prepaymentEntries

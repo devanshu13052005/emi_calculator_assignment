@@ -24,8 +24,8 @@ export function AppNavbar() {
             {mounted && (
               <>
                 <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <span className="px-2 py-1 rounded bg-muted text-foreground">{tabId}</span>
-                  {isLeader && <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded font-semibold">LEADER</span>}
+                  <span className="px-2 py-1 rounded bg-muted border border-border text-muted-foreground">{tabId}</span>
+                  {isLeader && <span className="bg-green-500/20 dark:bg-[#065f46] text-green-600 dark:text-green-300 px-2 py-1 rounded font-semibold border border-green-500/30 dark:border-green-800">LEADER</span>}
                   <span className="text-muted-foreground">● {activeTabCount} tabs</span>
                 </div>
               </>
