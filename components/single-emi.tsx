@@ -6,7 +6,7 @@ import { calculateEMI, generateAmortizationSchedule } from '@/lib/calculations';
 import { SyncedSlider } from '@/components/synced-slider';
 import { SummaryPanel } from '@/components/summary-panel';
 import { SensitivityGrid } from '@/components/sensitivity-grid';
-import { AmortizationTable } from '@/components/amortization-table';
+import { AmortizationSection } from '@/components/amortization-section';
 
 export function SingleEMIMode() {
   const store = useEMIStore();
@@ -80,9 +80,8 @@ export function SingleEMIMode() {
         </div>
       </div>
 
-      {/* Right Column - Results */}
+      {/* Right Column - Summary & Schedule */}
       <div className="lg:col-span-2 space-y-6">
-        {/* Summary Panel */}
         <SummaryPanel
           monthlyEMI={calculation.emi}
           totalInterest={calculation.totalInterest}
@@ -94,13 +93,7 @@ export function SingleEMIMode() {
         <SensitivityGrid principal={loan.principal} rate={loan.rate} tenure={loan.tenure} />
 
         {/* Amortization Schedule */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Amortization Schedule</h3>
-            <p className="text-sm text-muted-foreground">Month-by-month principal & interest breakdown</p>
-          </div>
-          <AmortizationTable schedule={amortizationSchedule} />
-        </div>
+        <AmortizationSection schedule={amortizationSchedule} />
       </div>
     </div>
   );
