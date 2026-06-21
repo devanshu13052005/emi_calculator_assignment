@@ -44,9 +44,10 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
                 key={row.month}
                 className={`border-b border-border transition-colors ${
                   row.isBreakEven
-                    ? 'bg-primary/20 hover:bg-primary/30 border-primary shadow-inner'
+                    ? 'bg-primary/10 hover:bg-primary/20 border-l-4'
                     : 'hover:bg-muted/50'
                 }`}
+                style={row.isBreakEven ? { borderLeftColor: 'var(--color-emi)' } : {}}
                 title={row.isBreakEven ? 'Break-even month: Cumulative Principal repaid first exceeds Cumulative Interest paid' : undefined}
               >
                 <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2">
@@ -57,18 +58,18 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right text-foreground font-medium">
+                <td className="px-4 py-3 text-right font-medium" style={{ color: 'var(--color-emi)' }}>
                   {formatCurrency(row.emi + (row.prepaymentAmount || 0))}
                   {row.prepaymentAmount > 0 && (
-                    <span className="block text-xs text-green-600 dark:text-green-400 mt-1">
+                    <span className="block text-xs mt-1" style={{ color: 'var(--color-interest-saved)' }}>
                       + {formatCurrency(row.prepaymentAmount)} prepay
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right text-accent">
+                <td className="px-4 py-3 text-right font-bold" style={{ color: 'var(--color-principal)' }}>
                   {formatCurrency(row.principalPayment)}
                 </td>
-                <td className="px-4 py-3 text-right text-destructive">
+                <td className="px-4 py-3 text-right font-medium" style={{ color: 'var(--color-interest)' }}>
                   {formatCurrency(row.interestPayment)}
                 </td>
                 <td className="px-4 py-3 text-right font-medium text-foreground">

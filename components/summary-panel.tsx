@@ -36,12 +36,12 @@ export function SummaryPanel({
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-xs font-medium text-muted-foreground mb-2 uppercase">Monthly EMI</div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--accent-yellow)' }}>{formatCurrency(monthlyEMI)}</div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--color-emi)' }}>{formatCurrency(monthlyEMI)}</div>
         </div>
 
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-xs font-medium text-muted-foreground mb-2 uppercase">Total Interest</div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--accent-red)' }}>{formatCurrency(totalInterest)}</div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--color-interest)' }}>{formatCurrency(totalInterest)}</div>
         </div>
 
         <div className="bg-card border border-border rounded-lg p-4">
@@ -66,12 +66,12 @@ export function SummaryPanel({
               style={{ 
                 width: `${principalPercentage}%`, 
                 minWidth: principalPercentage > 5 ? 'auto' : '0',
-                backgroundColor: '#ffffff'
+                backgroundColor: 'var(--color-principal)'
               }}
               title={`Principal: ${formatCurrency(principal)} (${principalPercentage.toFixed(1)}%)`}
             >
               {principalPercentage > 15 && (
-                <span className="text-xs font-bold text-gray-900">{principalPercentage.toFixed(0)}%</span>
+                <span className="text-xs font-bold text-background mix-blend-exclusion">{principalPercentage.toFixed(0)}%</span>
               )}
             </div>
             {/* Interest Segment */}
@@ -80,7 +80,7 @@ export function SummaryPanel({
               style={{ 
                 width: `${interestPercentage}%`, 
                 minWidth: interestPercentage > 5 ? 'auto' : '0',
-                backgroundColor: 'var(--accent-red)'
+                backgroundColor: 'var(--color-interest)'
               }}
               title={`Interest: ${formatCurrency(totalInterest)} (${interestPercentage.toFixed(1)}%)`}
             >
@@ -93,17 +93,17 @@ export function SummaryPanel({
 
         {/* Legend with Values */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-blue-600/10 border border-blue-600/20 rounded-lg p-3">
+          <div className="bg-muted border border-border rounded-lg p-3">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-principal)' }}></div>
               <span className="text-xs font-medium text-muted-foreground uppercase">Principal</span>
             </div>
             <div className="text-sm font-bold text-foreground">{formatCurrency(principal)}</div>
             <div className="text-xs text-muted-foreground mt-1">{principalPercentage.toFixed(1)}%</div>
           </div>
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+          <div className="bg-muted border border-border rounded-lg p-3">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-interest)' }}></div>
               <span className="text-xs font-medium text-muted-foreground uppercase">Interest</span>
             </div>
             <div className="text-sm font-bold text-foreground">{formatCurrency(totalInterest)}</div>

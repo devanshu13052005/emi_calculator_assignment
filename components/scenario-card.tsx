@@ -107,14 +107,14 @@ export function ScenarioCard({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Monthly EMI</span>
-          <span className="text-lg font-bold" style={{ color: 'var(--accent-yellow)' }}>
+          <span className="text-lg font-bold" style={{ color: 'var(--color-emi)' }}>
             {formatCurrency(calculation.emi)}
           </span>
         </div>
 
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Total Interest</span>
-          <span className="text-lg font-semibold" style={{ color: 'var(--accent-red)' }}>
+          <span className="text-lg font-semibold" style={{ color: 'var(--color-interest)' }}>
             {formatCurrency(calculation.totalInterest)}
           </span>
         </div>

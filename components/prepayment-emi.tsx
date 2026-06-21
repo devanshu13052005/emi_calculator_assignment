@@ -194,16 +194,16 @@ export function PrepaymentEMIMode() {
           <h3 className="text-lg font-semibold text-foreground mb-4">Prepayment Impact</h3>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-4 bg-green-50/50 border border-green-200 dark:border-green-900 rounded-lg">
-              <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase mb-1">Interest Saved</p>
-              <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+            <div className="p-4 bg-green-50/50 dark:bg-muted border border-green-200 dark:border-border rounded-lg">
+              <p className="text-xs font-medium text-green-600 dark:text-muted-foreground uppercase mb-1">Interest Saved</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-interest-saved)' }}>
                 {formatCurrency(prepaymentImpact.interestSavings)}
               </p>
             </div>
 
-            <div className="p-4 bg-blue-50/50 border border-blue-200 dark:border-blue-900 rounded-lg">
-              <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase mb-1">Tenure Reduced By</p>
-              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            <div className="p-4 bg-blue-50/50 dark:bg-muted border border-blue-200 dark:border-border rounded-lg">
+              <p className="text-xs font-medium text-blue-600 dark:text-muted-foreground uppercase mb-1">Tenure Reduced By</p>
+              <p className="text-2xl font-bold text-blue-700 dark:text-foreground">
                 {prepaymentImpact.tenureReduction === 0 ? '–' : `${prepaymentImpact.tenureReduction} mo`}
               </p>
             </div>
@@ -224,7 +224,7 @@ export function PrepaymentEMIMode() {
             </div>
             <div>
               <p className="text-muted-foreground mb-1">New Interest</p>
-              <p className="font-semibold text-foreground">{formatCurrency(prepaymentImpact.newTotalInterest)}</p>
+              <p className="font-semibold" style={{ color: 'var(--color-interest)' }}>{formatCurrency(prepaymentImpact.newTotalInterest)}</p>
             </div>
           </div>
         </div>
