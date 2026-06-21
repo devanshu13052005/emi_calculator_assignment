@@ -12,26 +12,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'EMI Workspace - Loan EMI Calculator',
-  description: 'Calculate and compare EMI for loans with ease. Single EMI calculation, loan comparison, and prepayment analysis all in one workspace.',
-  generator: 'v0.app',
-  keywords: ['EMI', 'loan', 'calculator', 'comparison', 'prepayment', 'amortization'],
+  title: 'EMI Workspace',
+  description: 'Loan EMI Calculator — synced across tabs',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 }
 
@@ -50,6 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+      </head>
       <body className="font-sans antialiased bg-background text-foreground">
         <ThemeProvider>
           {children}
