@@ -232,8 +232,49 @@ export function PrepaymentEMIMode() {
 
         {prepaymentImpact.adjustedSchedule && (
           <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Adjusted Schedule</h3>
-            <p className="text-sm text-muted-foreground mb-4">Amortization reflecting your prepayments</p>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Adjusted Schedule</h3>
+                <p className="text-sm text-muted-foreground">Amortization reflecting your prepayments</p>
+              </div>
+              
+              <button
+                onClick={() => {
+                  const schedule = prepaymentImpact.adjustedSchedule;
+                  if (!schedule || schedule.length === 0) return;
+
+                  const headers = ['Month', 'EMI', 'Principal', 'Interest', 'Prepayment', 'Balance'];
+                  const rows = schedule.map((row) => [
+                    row.month,
+                    Math.round(row.emi),
+                    Math.round(row.principalPayment),
+                    Math.round(row.interestPayment),
+                    Math.round(row.prepaymentAmount || 0),
+                    Math.round(row.balance)
+                  ].join(','));
+
+                  const csvContent = [headers.join(','), ...rows].join('\n');
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'adjusted_schedule.csv');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium bg-secondary text-secondary-foreground rounded-lg border border-border hover:bg-muted transition-colors shrink-0"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export CSV
+              </button>
+            </div>
+            
             <AmortizationTable schedule={prepaymentImpact.adjustedSchedule} />
           </div>
         )}
