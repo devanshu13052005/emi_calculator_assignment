@@ -1,13 +1,11 @@
 'use client';
 
 import { useTheme } from '@/components/theme-provider';
-import { useEMIStore } from '@/lib/store';
 import { useTabIdentity } from '@/lib/useTabIdentity';
 import { useState, useEffect } from 'react';
 
 export function AppNavbar() {
   const { theme, toggleTheme } = useTheme();
-  const store = useEMIStore();
   const { tabId, activeTabCount, isLeader } = useTabIdentity();
   const [mounted, setMounted] = useState(false);
 
@@ -16,32 +14,60 @@ export function AppNavbar() {
   }, []);
 
   return (
-    <nav className="w-full bg-background border-b border-border sticky top-0 z-50">
+    <nav className="w-full bg-card border-b sticky top-0 z-50" style={{ borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">EMI Workspace</h1>
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
+            EMI Workspace
+          </h1>
           <div className="flex items-center gap-3">
             {mounted && (
-              <>
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <span className="px-2 py-1 rounded bg-muted border border-border text-muted-foreground">{tabId}</span>
-                  {isLeader && <span className="bg-green-500/20 dark:bg-[#065f46] text-green-600 dark:text-green-300 px-2 py-1 rounded font-semibold border border-green-500/30 dark:border-green-800">LEADER</span>}
-                  <span className="text-muted-foreground">● {activeTabCount} tabs</span>
-                </div>
-              </>
+              <div className="text-xs text-muted-foreground flex items-center gap-2">
+                <span
+                  className="px-2 py-1 border font-semibold text-[13px]"
+                  style={{
+                    backgroundColor: 'var(--highlight-bg)',
+                    color: 'var(--accent-blue)',
+                    borderColor: '#c7d2fe',
+                    borderRadius: 8,
+                  }}
+                >
+                  {tabId}
+                </span>
+                {isLeader && (
+                  <span
+                    className="px-2 py-1 border"
+                    style={{
+                      backgroundColor: '#dcfce7',
+                      color: '#166534',
+                      borderColor: '#86efac',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    LEADER
+                  </span>
+                )}
+                <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-interest-saved)' }} />
+                  {activeTabCount} {activeTabCount === 1 ? 'tab' : 'tabs'}
+                </span>
+              </div>
             )}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted transition-all"
               aria-label="Toggle theme"
               title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             >
               {theme === 'light' ? (
-                <svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="theme-toggle-icon w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="theme-toggle-icon is-dark w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.121-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM5.464 5.464a1 1 0 000 1.414l-.707.707A1 1 0 003.343 5.464l.707-.707a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               )}

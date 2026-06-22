@@ -27,7 +27,7 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
   return (
     <div className="space-y-4">
       {/* Table */}
-      <div className="overflow-x-auto border border-border rounded-lg">
+      <div className="table-shell overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-sm">
           <thead className="bg-muted">
             <tr className="border-b border-border">
@@ -44,16 +44,16 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
                 key={row.month}
                 className={`border-b border-border transition-colors ${
                   row.isBreakEven
-                    ? 'bg-primary/10 hover:bg-primary/20 border-l-4'
+                    ? 'break-even-row hover:bg-[#fef9c3] dark:hover:bg-primary/20 border-l-[3px]'
                     : 'hover:bg-muted/50'
                 }`}
                 style={row.isBreakEven ? { borderLeftColor: 'var(--color-emi)' } : {}}
                 title={row.isBreakEven ? 'Break-even month: Cumulative Principal repaid first exceeds Cumulative Interest paid' : undefined}
               >
-                <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2">
+                <td className="px-4 py-3 font-medium flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   {row.month}
                   {row.isBreakEven && (
-                    <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded uppercase font-bold">
+                    <span className="break-even-badge text-[10px] px-1.5 py-0.5 rounded uppercase font-bold">
                       Break-even
                     </span>
                   )}
@@ -66,13 +66,13 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right font-bold" style={{ color: 'var(--color-principal)' }}>
+                <td className="px-4 py-3 text-right font-semibold" style={{ color: 'var(--color-principal)' }}>
                   {formatCurrency(row.principalPayment)}
                 </td>
                 <td className="px-4 py-3 text-right font-medium" style={{ color: 'var(--color-interest)' }}>
                   {formatCurrency(row.interestPayment)}
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-foreground">
+                <td className="px-4 py-3 text-right font-medium" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(row.balance)}
                 </td>
               </tr>
@@ -87,7 +87,7 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground disabled:opacity-50 hover:bg-muted transition-colors"
+            className="pagination-button px-3 py-2 rounded-lg border bg-background disabled:opacity-50 hover:bg-muted transition-colors"
           >
             Previous
           </button>
@@ -111,7 +111,7 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
                   className={`px-3 py-2 rounded-lg transition-colors ${
                     currentPage === pageNum
                       ? 'bg-primary text-primary-foreground'
-                      : 'border border-input bg-background text-foreground hover:bg-muted'
+                      : 'pagination-button border bg-background hover:bg-muted'
                   }`}
                 >
                   {pageNum}
@@ -123,7 +123,7 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground disabled:opacity-50 hover:bg-muted transition-colors"
+            className="pagination-button px-3 py-2 rounded-lg border bg-background disabled:opacity-50 hover:bg-muted transition-colors"
           >
             Next
           </button>

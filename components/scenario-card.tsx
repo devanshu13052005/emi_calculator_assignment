@@ -32,16 +32,17 @@ export function ScenarioCard({
 
   return (
     <div
-      className={`relative border rounded-lg p-4 transition-all ${
+      className={`relative border rounded-lg p-6 transition-all ${
         isBestValue
-          ? 'border-green-400 bg-green-50/30 shadow-lg'
+          ? 'border-2 bg-green-50 dark:bg-muted shadow-lg'
           : 'border-border bg-card'
       }`}
+      style={isBestValue ? { borderColor: 'var(--color-interest-saved)' } : undefined}
     >
       {/* Best Value Badge */}
       {isBestValue && (
         <div className="absolute -top-3 left-4">
-          <span className="bg-green-400 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          <span className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: '#dcfce7', color: '#166534', fontWeight: 700 }}>
             BEST VALUE
           </span>
         </div>
@@ -54,7 +55,7 @@ export function ScenarioCard({
             type="text"
             value={loan.name}
             onChange={(e) => onUpdate({ name: e.target.value })}
-            className="text-lg font-semibold text-foreground bg-transparent border-none focus:outline-none focus:ring-0 p-0 w-full"
+            className="text-lg font-bold text-foreground bg-transparent border-none focus:outline-none focus:ring-0 p-0 w-full"
           />
         </div>
         {showRemove && (
@@ -121,7 +122,7 @@ export function ScenarioCard({
 
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Total Payable</span>
-          <span className="text-lg font-semibold text-foreground">
+          <span className="text-lg font-bold text-foreground">
             {formatCurrency(calculation.totalAmount)}
           </span>
         </div>

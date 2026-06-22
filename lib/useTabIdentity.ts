@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 export interface SyncMessage {
   type: 'HEARTBEAT';
-  senderId: string;
+  tabId: string;
   timestamp?: number;
 }
 
@@ -29,6 +29,7 @@ export function useTabIdentity(): {
   const tabIdRef = useRef(tabId);
 
   useEffect(() => {
+    let cancelled = false;
     if (typeof window === 'undefined') return;
     if (!('BroadcastChannel' in window)) {
       console.warn('[useTabIdentity] BroadcastChannel not supported');
@@ -39,48 +40,54 @@ export function useTabIdentity(): {
       const channel = new BroadcastChannel(PRESENCE_CHANNEL);
       channelRef.current = channel;
 
-      // Listen for heartbeats from other tabs
       channel.onmessage = (event: MessageEvent<SyncMessage>) => {
+        if (cancelled) return;
         const msg = event.data;
-        if (msg.type === 'HEARTBEAT' && msg.senderId !== tabIdRef.current) {
-          setPresenceMap((prev) => ({
-            ...prev,
-            [msg.senderId]: msg.timestamp ?? Date.now(),
-          }));
-        }
-      };
-
-      // Send own heartbeat immediately and then every 2 seconds
-      const sendHeartbeat = () => {
+        if (msg.type !== 'HEARTBEAT') return;
+        if (msg.tabId === tabIdRef.current) return;
         setPresenceMap((prev) => ({
           ...prev,
-          [tabIdRef.current]: Date.now(),
+          [msg.tabId]: msg.timestamp ?? Date.now(),
+        }));
+      };
+
+      const beat = () => {
+        if (cancelled) return;
+        const now = Date.now();
+        setPresenceMap((prev) => ({
+          ...prev,
+          [tabIdRef.current]: now,
         }));
         channel.postMessage({
           type: 'HEARTBEAT',
-          senderId: tabIdRef.current,
-          timestamp: Date.now(),
+          tabId: tabIdRef.current,
+          timestamp: now,
         } as SyncMessage);
       };
 
-      sendHeartbeat();
-      const heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+      beat();
+      const heartbeatTimer = setInterval(beat, HEARTBEAT_INTERVAL);
 
-      // Evict stale tabs every 3 seconds
-      const evictInterval = setInterval(() => {
-        const now = Date.now();
+      const evictTimer = setInterval(() => {
+        if (cancelled) return;
+        const cutoff = Date.now() - TAB_TIMEOUT;
         setPresenceMap((prev) => {
-          const updated = { ...prev };
-          Object.entries(updated).forEach(([id, lastSeen]) => {
-            if (now - lastSeen > TAB_TIMEOUT) delete updated[id];
-          });
-          return updated;
+          const next = { ...prev };
+          let changed = false;
+          for (const id of Object.keys(next)) {
+            if (next[id] < cutoff) {
+              delete next[id];
+              changed = true;
+            }
+          }
+          return changed ? next : prev;
         });
       }, 3000);
 
       return () => {
-        clearInterval(heartbeatInterval);
-        clearInterval(evictInterval);
+        cancelled = true;
+        clearInterval(heartbeatTimer);
+        clearInterval(evictTimer);
         channel.close();
         channelRef.current = null;
       };
@@ -90,11 +97,11 @@ export function useTabIdentity(): {
   }, []);
 
   const allTabIds = Object.keys(presenceMap).sort();
-  const isLeader = allTabIds.length === 0 || allTabIds[0] === tabId;
+  const isLeader = allTabIds[0] === tabId;
 
   return {
     tabId,
-    activeTabCount: Object.keys(presenceMap).length,
+    activeTabCount: allTabIds.length,
     isLeader,
   };
 }

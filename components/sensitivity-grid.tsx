@@ -9,21 +9,19 @@ interface SensitivityGridProps {
 }
 
 export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProps) {
-  // Use exact rate and tenure offsets as per assignment
   const rateOffsets = [-3, -2, -1, 0, 1, 2, 3];
   const tenureOffsets = [-24, -12, -6, 0, 6, 12, 24];
 
-  // Calculate actual bounds, clamp them, and deduplicate
   const rateVariations = Array.from(new Set(
     rateOffsets
-      .map(offset => rate + offset)
-      .map(r => Math.max(1, Math.min(36, r))) // Clamp to 1% - 36%
+      .map((offset) => rate + offset)
+      .map((r) => Math.max(1, Math.min(36, r)))
   )).sort((a, b) => a - b);
 
   const tenureVariations = Array.from(new Set(
     tenureOffsets
-      .map(offset => tenure + offset)
-      .map(t => Math.max(1, Math.min(84, t))) // Clamp to 1 - 84 months
+      .map((offset) => tenure + offset)
+      .map((t) => Math.max(1, Math.min(84, t)))
   )).sort((a, b) => a - b);
 
   const formatCurrency = (value: number) => {
@@ -43,22 +41,24 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
     return `${m} mo`;
   };
 
+  const cellBorder = { borderColor: 'var(--chart-grid)' };
+
   return (
     <div className="bg-card dark:bg-muted border border-border rounded-lg p-6 overflow-x-auto">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Sensitivity Analysis</h3>
+        <h3 className="text-lg font-bold text-foreground">Sensitivity Analysis</h3>
         <p className="text-sm text-muted-foreground">See how your EMI changes with different rates and tenures</p>
       </div>
 
-      <div className="min-w-[600px]">
+      <div className="table-shell min-w-[600px]">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th className="p-2 border border-border bg-muted text-foreground dark:text-[#e2e8f0] font-medium text-left">
+              <th className="p-2 border bg-muted text-left" style={cellBorder}>
                 Rate \ Tenure
               </th>
               {tenureVariations.map((t) => (
-                <th key={t} className="p-2 border border-border bg-muted text-foreground dark:text-[#e2e8f0] font-medium text-center">
+                <th key={t} className="p-2 border bg-muted text-center" style={cellBorder}>
                   {formatTenure(t)} {t === tenure ? '(Current)' : ''}
                 </th>
               ))}
@@ -67,22 +67,22 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
           <tbody>
             {rateVariations.map((r) => (
               <tr key={r}>
-                <th className="p-2 border border-border bg-muted text-foreground dark:text-[#e2e8f0] font-medium text-left">
+                <th className="p-2 border bg-muted text-left" style={cellBorder}>
                   {r.toFixed(1)}% {r === rate ? '(Current)' : ''}
                 </th>
                 {tenureVariations.map((t) => {
                   const isCurrent = t === tenure && r === rate;
                   const { emi } = calculateEMI({ principal, rate: r, tenure: t });
-                  
+
                   return (
-                    <td 
+                    <td
                       key={`${r}-${t}`}
-                      className={`p-2 border border-border text-center transition-colors ${
-                        isCurrent 
-                          ? 'bg-primary text-primary-foreground font-bold shadow-sm' 
+                      className={`p-2 border text-center transition-colors ${
+                        isCurrent
+                          ? 'bg-primary text-primary-foreground font-bold shadow-sm'
                           : 'hover:bg-muted/50'
                       }`}
-                      style={!isCurrent ? { color: 'var(--color-emi)' } : undefined}
+                      style={!isCurrent ? { ...cellBorder, color: 'var(--text-primary)' } : cellBorder}
                     >
                       {formatCurrency(emi)}
                     </td>

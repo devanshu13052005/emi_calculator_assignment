@@ -38,7 +38,10 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
+    <div
+      className="rounded-lg border border-border px-3 py-2 text-sm shadow-lg"
+      style={{ backgroundColor: 'var(--tooltip-bg)', color: 'var(--text-primary)' }}
+    >
       <p className="mb-1 font-semibold">Month {label}</p>
       {payload.map((entry) => (
         <p key={entry.name} style={{ color: entry.color }}>
@@ -69,13 +72,13 @@ export function AmortizationChart({ rows }: Props) {
     <div className="h-[360px] w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 12, right: 16, left: 12, bottom: 12 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
           <XAxis
             dataKey="month"
             interval={interval}
-            tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+            tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
             tickLine={false}
-            axisLine={{ stroke: 'var(--border)' }}
+            axisLine={{ stroke: 'var(--chart-grid)' }}
           />
           <YAxis
             width={64}
@@ -84,12 +87,12 @@ export function AmortizationChart({ rows }: Props) {
               if (value >= 1000) return `₹${Math.round(value / 1000)}K`;
               return `₹${value}`;
             }}
-            tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+            tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--muted)', opacity: 0.35 }} />
-          <Legend wrapperStyle={{ color: 'var(--foreground)', fontSize: 13, paddingTop: 12 }} />
+          <Legend wrapperStyle={{ color: 'var(--text-primary)', fontSize: 13, paddingTop: 12 }} />
           <Bar
             dataKey="principal"
             name="Principal"

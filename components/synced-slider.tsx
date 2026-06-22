@@ -72,7 +72,7 @@ export function SyncedSlider({
   return (
     <div className="w-full space-y-3" style={{ maxWidth }}>
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground">{label}</label>
+        <label className="text-sm font-semibold text-foreground">{label}</label>
         {showInput && (
           <div className="flex items-center gap-1">
             {prefix && <span className="text-sm text-muted-foreground">{prefix}</span>}
@@ -100,6 +100,7 @@ export function SyncedSlider({
         value={value}
         onChange={handleSliderChange}
         className="w-full"
+        style={{ '--range-progress': `${percentage}%` } as React.CSSProperties}
       />
 
       {/* Min and Max Labels */}
