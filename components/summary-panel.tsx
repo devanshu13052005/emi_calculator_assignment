@@ -30,21 +30,20 @@ export function SummaryPanel({
       <div>
         <h3 className="text-lg font-bold text-foreground mb-1">Summary</h3>
       </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div className="summary-card bg-card border border-border rounded-lg p-6">
-          <div className="summary-label mb-2">Monthly EMI</div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-emi)' }}>{formatCurrency(monthlyEMI)}</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="text-xs font-medium text-muted-foreground mb-2 uppercase">Monthly EMI</div>
+          <div className="font-bold text-[clamp(20px,5vw,28px)]" style={{ color: 'var(--color-emi)' }}>{formatCurrency(monthlyEMI)}</div>
         </div>
 
-        <div className="summary-card bg-card border border-border rounded-lg p-6">
-          <div className="summary-label mb-2">Total Interest</div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-interest)' }}>{formatCurrency(totalInterest)}</div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="text-xs font-medium text-muted-foreground mb-2 uppercase">Total Interest</div>
+          <div className="font-bold text-[clamp(20px,5vw,28px)]" style={{ color: 'var(--color-interest)' }}>{formatCurrency(totalInterest)}</div>
         </div>
 
-        <div className="summary-card bg-card border border-border rounded-lg p-6">
-          <div className="summary-label mb-2">Total Payable</div>
-          <div className="text-2xl font-bold text-foreground">{formatCurrency(totalAmount)}</div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="text-xs font-medium text-muted-foreground mb-2 uppercase">Total Payable</div>
+          <div className="font-bold text-foreground text-[clamp(20px,5vw,28px)]">{formatCurrency(totalAmount)}</div>
         </div>
       </div>
 

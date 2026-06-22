@@ -16,15 +16,15 @@ export function AppNavbar() {
   return (
     <nav className="w-full bg-card border-b sticky top-0 z-50" style={{ borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
+        <div className="flex items-center justify-between flex-nowrap gap-2">
+          <h1 className="font-bold truncate text-[clamp(18px,5vw,28px)]" style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
             EMI Workspace
           </h1>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {mounted && (
-              <div className="text-xs text-muted-foreground flex items-center gap-2">
+              <div className="text-xs text-muted-foreground flex items-center gap-1.5 sm:gap-2">
                 <span
-                  className="px-2 py-1 border font-semibold text-[13px]"
+                  className="border font-semibold text-[11px] sm:text-[13px] px-1.5 py-0.5 sm:px-2 sm:py-1"
                   style={{
                     backgroundColor: 'var(--highlight-bg)',
                     color: 'var(--accent-blue)',
@@ -36,13 +36,13 @@ export function AppNavbar() {
                 </span>
                 {isLeader && (
                   <span
-                    className="px-2 py-1 border"
+                    className="px-1.5 py-0.5 sm:px-2 sm:py-1 border"
                     style={{
                       backgroundColor: '#dcfce7',
                       color: '#166534',
                       borderColor: '#86efac',
                       borderRadius: 6,
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: 700,
                       letterSpacing: '0.05em',
                     }}
@@ -50,7 +50,7 @@ export function AppNavbar() {
                     LEADER
                   </span>
                 )}
-                <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+                <span className="hidden sm:flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-interest-saved)' }} />
                   {activeTabCount} {activeTabCount === 1 ? 'tab' : 'tabs'}
                 </span>

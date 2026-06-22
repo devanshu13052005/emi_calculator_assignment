@@ -69,9 +69,9 @@ export function PrepaymentEMIMode() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
       {/* Left Column - Loan Details & Prepayment Input */}
-      <div className="lg:col-span-1 space-y-6">
+      <div className="space-y-6">
         
         {/* Base Loan Controls for Prepayment Mode */}
         <div className="bg-card border border-border rounded-lg p-6 space-y-6">
@@ -190,7 +190,7 @@ export function PrepaymentEMIMode() {
       </div>
 
       {/* Right Column - Results & Schedule */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="space-y-6 min-w-0">
         <div className="bg-card border border-border rounded-lg p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Prepayment Impact</h3>
 

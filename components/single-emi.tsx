@@ -33,9 +33,9 @@ export function SingleEMIMode() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
       {/* Left Sidebar - Loan Details */}
-      <div className="lg:col-span-1">
+      <div>
         <div className="bg-card border border-border rounded-lg p-6 space-y-6 sticky top-24">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Loan Details</h3>
@@ -81,7 +81,7 @@ export function SingleEMIMode() {
       </div>
 
       {/* Right Column - Summary & Schedule */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="space-y-6 min-w-0">
         <SummaryPanel
           monthlyEMI={calculation.emi}
           totalInterest={calculation.totalInterest}

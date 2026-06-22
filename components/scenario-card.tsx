@@ -32,7 +32,7 @@ export function ScenarioCard({
 
   return (
     <div
-      className={`relative border rounded-lg p-6 transition-all ${
+      className={`relative w-full max-w-full border rounded-lg p-6 transition-all ${
         isBestValue
           ? 'border-2 bg-green-50 dark:bg-muted shadow-lg'
           : 'border-border bg-card'

@@ -50,8 +50,8 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
         <p className="text-sm text-muted-foreground">See how your EMI changes with different rates and tenures</p>
       </div>
 
-      <div className="table-shell min-w-[600px]">
-        <table className="w-full text-sm border-collapse">
+      <div className="table-shell overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <table className="w-full text-sm border-collapse min-w-[500px]">
           <thead>
             <tr>
               <th className="p-2 border bg-muted text-left" style={cellBorder}>

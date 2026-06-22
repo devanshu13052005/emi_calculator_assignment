@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -53,6 +54,15 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
 }
 
 export function AmortizationChart({ rows }: Props) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize(); // initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (rows.length === 0) {
     return (
       <div className="bg-muted p-4 rounded-lg text-center text-muted-foreground">
@@ -61,7 +71,16 @@ export function AmortizationChart({ rows }: Props) {
     );
   }
 
-  const interval = rows.length <= 24 ? 0 : rows.length <= 48 ? 1 : 2;
+  const getInterval = (totalMonths: number) => {
+    if (totalMonths <= 12) return 0;
+    if (totalMonths <= 24) return 2;
+    if (totalMonths <= 48) return 5;
+    return 11;
+  };
+
+  const interval = getInterval(rows.length);
+  const chartHeight = isMobile ? 240 : 360;
+
   const data = rows.map((row) => ({
     month: row.month,
     principal: Math.round(row.principalPayment),
@@ -69,16 +88,21 @@ export function AmortizationChart({ rows }: Props) {
   }));
 
   return (
-    <div className="h-[360px] w-full min-w-0">
+    <div style={{ height: chartHeight }} className="w-full min-w-0 transition-all duration-300">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 12, right: 16, left: 12, bottom: 12 }}>
+        <BarChart 
+          data={data} 
+          margin={{ top: 12, right: 16, left: 12, bottom: isMobile ? 0 : 12 }}
+          barCategoryGap={rows.length > 36 ? "5%" : "15%"}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
           <XAxis
             dataKey="month"
             interval={interval}
-            tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+            tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
             tickLine={false}
             axisLine={{ stroke: 'var(--chart-grid)' }}
+            label={isMobile ? undefined : { value: 'Month', position: 'insideBottom', offset: -5, fill: 'var(--text-secondary)', fontSize: 12 }}
           />
           <YAxis
             width={64}

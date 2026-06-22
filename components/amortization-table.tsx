@@ -2,7 +2,7 @@
 
 import { AmortizationRow } from '@/lib/types';
 import { formatCurrency } from '@/lib/calculations';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface AmortizationTableProps {
   schedule: AmortizationRow[];
@@ -11,6 +11,14 @@ interface AmortizationTableProps {
 export function AmortizationTable({ schedule }: AmortizationTableProps) {
   const [itemsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const totalPages = Math.ceil(schedule.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -27,15 +35,15 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
   return (
     <div className="space-y-4">
       {/* Table */}
-      <div className="table-shell overflow-x-auto border border-border rounded-lg">
-        <table className="w-full text-sm">
+      <div className="table-shell overflow-x-auto border border-border rounded-lg" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <table className="w-full text-sm min-w-[600px]">
           <thead className="bg-muted">
             <tr className="border-b border-border">
-              <th className="px-4 py-3 text-left font-medium text-foreground dark:text-[#e2e8f0]">Month</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">EMI</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">Principal</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">Interest</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">Balance</th>
+              <th className="px-4 py-3 text-left font-medium text-foreground dark:text-[#e2e8f0]" style={{ width: '50px' }}>Month</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]" style={{ width: '90px' }}>EMI</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]" style={{ width: '90px' }}>Principal</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]" style={{ width: '90px' }}>Interest</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]" style={{ width: '100px' }}>Balance</th>
             </tr>
           </thead>
           <tbody>
@@ -53,8 +61,11 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
                 <td className="px-4 py-3 font-medium flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   {row.month}
                   {row.isBreakEven && (
-                    <span className="break-even-badge text-[10px] px-1.5 py-0.5 rounded uppercase font-bold">
-                      Break-even
+                    <span 
+                      className="break-even-badge text-[10px] px-1.5 py-0.5 rounded uppercase font-bold"
+                      style={{ maxWidth: 'fit-content', whiteSpace: 'nowrap' }}
+                    >
+                      {isMobile ? 'BE' : 'Break-even'}
                     </span>
                   )}
                 </td>

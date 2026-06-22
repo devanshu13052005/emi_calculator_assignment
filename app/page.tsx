@@ -35,10 +35,10 @@ export default function Page() {
       {/* Tab Navigation */}
       <div className="border-b border-border bg-background/50 sticky top-16 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto whitespace-nowrap pb-2 sm:pb-0 -mb-2 sm:mb-0">
             <button
               onClick={() => store.setActiveTab('single')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 py-2 sm:px-4 sm:py-2 text-[13px] sm:text-base rounded-lg font-medium transition-colors ${
                 store.activeTab === 'single'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -48,7 +48,7 @@ export default function Page() {
             </button>
             <button
               onClick={() => store.setActiveTab('compare')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 py-2 sm:px-4 sm:py-2 text-[13px] sm:text-base rounded-lg font-medium transition-colors ${
                 store.activeTab === 'compare'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -58,7 +58,7 @@ export default function Page() {
             </button>
             <button
               onClick={() => store.setActiveTab('prepayment')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 py-2 sm:px-4 sm:py-2 text-[13px] sm:text-base rounded-lg font-medium transition-colors ${
                 store.activeTab === 'prepayment'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -71,7 +71,7 @@ export default function Page() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {mounted && (
           <>
             {store.activeTab === 'single' && <SingleEMIMode />}
