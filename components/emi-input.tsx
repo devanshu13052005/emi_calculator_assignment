@@ -10,6 +10,8 @@ interface EMIInputProps {
 }
 
 export function EMIInputComponent({ value, onChange, showLabel = true }: EMIInputProps) {
+  const clampTenure = (tenure: number) => Math.min(84, Math.max(1, Math.round(tenure)));
+
   return (
     <div className="space-y-6">
       {/* Principal Input */}
@@ -75,11 +77,12 @@ export function EMIInputComponent({ value, onChange, showLabel = true }: EMIInpu
             type="number"
             value={value.tenure}
             onChange={(e) => onChange({ tenure: parseInt(e.target.value) || 0 })}
+            onBlur={(e) => onChange({ tenure: clampTenure(parseInt(e.target.value) || value.tenure) })}
             className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Enter tenure"
             min="1"
             step="1"
-            max="600"
+            max="84"
           />
           <span className="absolute right-3 top-3 text-foreground/60">months</span>
         </div>

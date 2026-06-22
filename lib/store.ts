@@ -22,6 +22,13 @@ const DEFAULT_COMPARISON_LOAN: ComparisonLoan = {
   tenure: 60, // 5 years in months
 };
 
+const clampTenure = (value: number) => Math.min(84, Math.max(1, Math.round(value)));
+
+const clampLoanTenure = <T extends EMIInput>(loan: T): T => ({
+  ...loan,
+  tenure: clampTenure(loan.tenure),
+});
+
 const INITIAL_STATE: AppState = {
   singleLoan: DEFAULT_SINGLE_LOAN,
   singleOutput: calculateEMI(DEFAULT_SINGLE_LOAN),
@@ -100,7 +107,7 @@ export const useEMIStore = create<AppState & StoreActions>()(
       set((state) => {
         let newTenure = updates.tenure;
         if (newTenure !== undefined) {
-          newTenure = Math.min(84, Math.max(1, Math.round(newTenure)));
+          newTenure = clampTenure(newTenure);
         }
         const newLoan = { ...state.singleLoan, ...updates, ...(newTenure !== undefined && { tenure: newTenure }) };
         return {
@@ -119,10 +126,11 @@ export const useEMIStore = create<AppState & StoreActions>()(
     // Comparison Mode
     updateComparisonLoans: (loans) =>
       set((state) => {
+        const clampedLoans = loans.map(clampLoanTenure);
         const comparisonResults =
-          loans.length === 2 ? compareTwoLoans(loans[0], loans[1]) : null;
+          clampedLoans.length === 2 ? compareTwoLoans(clampedLoans[0], clampedLoans[1]) : null;
         return {
-          comparisonLoans: loans,
+          comparisonLoans: clampedLoans,
           comparisonResults,
           lastUpdate: Date.now(),
         };
@@ -132,7 +140,7 @@ export const useEMIStore = create<AppState & StoreActions>()(
       set((state) => {
         let newTenure = updates.tenure;
         if (newTenure !== undefined) {
-          newTenure = Math.min(84, Math.max(1, Math.round(newTenure)));
+          newTenure = clampTenure(newTenure);
         }
         const newLoans = state.comparisonLoans.map((loan) =>
           loan.id === id ? { ...loan, ...updates, ...(newTenure !== undefined && { tenure: newTenure }) } : loan
@@ -188,7 +196,7 @@ export const useEMIStore = create<AppState & StoreActions>()(
       set((state) => {
         let newTenure = updates.tenure;
         if (newTenure !== undefined) {
-          newTenure = Math.min(84, Math.max(1, Math.round(newTenure)));
+          newTenure = clampTenure(newTenure);
         }
         const newLoan = { ...state.prepaymentLoan, ...updates, ...(newTenure !== undefined && { tenure: newTenure }) };
         const prepaymentResult = calculatePrepayment(
@@ -259,9 +267,10 @@ export const useEMIStore = create<AppState & StoreActions>()(
       const state = get();
       if (state.historyIndex > 0) {
         const previousState = state.history[state.historyIndex - 1];
+        const { historyIndex, ...restoredState } = previousState;
         set({
+          ...restoredState,
           historyIndex: state.historyIndex - 1,
-          ...previousState,
         });
       }
     },
@@ -270,9 +279,10 @@ export const useEMIStore = create<AppState & StoreActions>()(
       const state = get();
       if (state.historyIndex < state.history.length - 1) {
         const nextState = state.history[state.historyIndex + 1];
+        const { historyIndex, ...restoredState } = nextState;
         set({
+          ...restoredState,
           historyIndex: state.historyIndex + 1,
-          ...nextState,
         });
       }
     },
@@ -289,9 +299,13 @@ export const useEMIStore = create<AppState & StoreActions>()(
     loadFromUrl: (urlState) => {
       try {
         const decoded = JSON.parse(atob(urlState)) as Partial<AppState>;
+        const singleLoan = decoded.singleLoan
+          ? clampLoanTenure(decoded.singleLoan)
+          : INITIAL_STATE.singleLoan;
+
         set({
-          singleLoan: decoded.singleLoan || INITIAL_STATE.singleLoan,
-          singleOutput: decoded.singleOutput || INITIAL_STATE.singleOutput,
+          singleLoan,
+          singleOutput: calculateEMI(singleLoan),
           activeTab: decoded.activeTab || 'single',
           lastUpdate: Date.now(),
         });
@@ -308,6 +322,24 @@ export const useEMIStore = create<AppState & StoreActions>()(
     replaceState: (incoming) => {
       // Merge the incoming state, skipping history and internal fields
       const { history, historyIndex, isTabLeader, ...syncableState } = incoming as AppState;
+      if (syncableState.singleLoan) {
+        syncableState.singleLoan = clampLoanTenure(syncableState.singleLoan);
+      }
+      if (syncableState.prepaymentLoan) {
+        syncableState.prepaymentLoan = clampLoanTenure(syncableState.prepaymentLoan);
+      }
+      if (syncableState.comparisonLoans) {
+        syncableState.comparisonLoans = syncableState.comparisonLoans.map(clampLoanTenure);
+      }
+      if (syncableState.singleLoan) {
+        syncableState.singleOutput = calculateEMI(syncableState.singleLoan);
+      }
+      if (syncableState.prepaymentLoan) {
+        syncableState.prepaymentResult = calculatePrepayment(
+          syncableState.prepaymentLoan,
+          syncableState.prepaymentEntries || []
+        );
+      }
       set({
         ...syncableState,
         lastUpdate: Date.now(),

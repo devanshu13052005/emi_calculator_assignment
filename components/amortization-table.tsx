@@ -31,11 +31,11 @@ export function AmortizationTable({ schedule }: AmortizationTableProps) {
         <table className="w-full text-sm">
           <thead className="bg-muted">
             <tr className="border-b border-border">
-              <th className="px-4 py-3 text-left font-medium text-foreground">Month</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">EMI</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">Principal</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">Interest</th>
-              <th className="px-4 py-3 text-right font-medium text-foreground">Balance</th>
+              <th className="px-4 py-3 text-left font-medium text-foreground dark:text-[#e2e8f0]">Month</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">EMI</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">Principal</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">Interest</th>
+              <th className="px-4 py-3 text-right font-medium text-foreground dark:text-[#e2e8f0]">Balance</th>
             </tr>
           </thead>
           <tbody>

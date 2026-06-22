@@ -77,10 +77,13 @@ export function SyncedSlider({
           <div className="flex items-center gap-1">
             {prefix && <span className="text-sm text-muted-foreground">{prefix}</span>}
             <input
-              type="text"
+              type="number"
               value={inputValue}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
+              min={min}
+              max={max}
+              step={step}
               className="w-24 px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {suffix && <span className="text-sm text-muted-foreground">{suffix}</span>}
@@ -100,7 +103,7 @@ export function SyncedSlider({
       />
 
       {/* Min and Max Labels */}
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="slider-bound-label flex justify-between text-xs text-muted-foreground">
         <span>{prefix}{min.toLocaleString('en-IN')}{suffix}</span>
         <span>{prefix}{max.toLocaleString('en-IN')}{suffix}</span>
       </div>

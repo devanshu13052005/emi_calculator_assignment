@@ -98,7 +98,7 @@ export function SummaryPanel({
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-principal)' }}></div>
               <span className="text-xs font-medium text-muted-foreground uppercase">Principal</span>
             </div>
-            <div className="text-sm font-bold text-foreground">{formatCurrency(principal)}</div>
+            <div className="text-sm font-bold" style={{ color: 'var(--color-principal)' }}>{formatCurrency(principal)}</div>
             <div className="text-xs text-muted-foreground mt-1">{principalPercentage.toFixed(1)}%</div>
           </div>
           <div className="bg-muted border border-border rounded-lg p-3">
@@ -106,7 +106,7 @@ export function SummaryPanel({
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--color-interest)' }}></div>
               <span className="text-xs font-medium text-muted-foreground uppercase">Interest</span>
             </div>
-            <div className="text-sm font-bold text-foreground">{formatCurrency(totalInterest)}</div>
+            <div className="text-sm font-bold" style={{ color: 'var(--color-interest)' }}>{formatCurrency(totalInterest)}</div>
             <div className="text-xs text-muted-foreground mt-1">{interestPercentage.toFixed(1)}%</div>
           </div>
         </div>

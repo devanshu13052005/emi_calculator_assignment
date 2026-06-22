@@ -92,7 +92,8 @@
   
   /* EMI Color Scheme - Light Mode */
   --color-emi: #d97706;
-  --color-principal: #1a202c;
+  --color-principal: #000000;
+  --color-chart-principal: #4f46e5;
   --color-interest: #ef4444;
   --color-interest-saved: #10b981;
 }
@@ -135,6 +136,7 @@
   /* EMI Color Scheme - Dark Mode */
   --color-emi: #fbbf24;
   --color-principal: #ffffff;
+  --color-chart-principal: #ffffff;
   --color-interest: #f87171;
   --color-interest-saved: #34d399;
 }
@@ -173,6 +175,11 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+    --color-emi: #fbbf24;
+    --color-principal: #ffffff;
+    --color-chart-principal: #ffffff;
+    --color-interest: #f87171;
+    --color-interest-saved: #34d399;
   }
 }
 
@@ -242,7 +249,19 @@ input[type="range"]::-moz-range-track {
     @apply font-sans;
   }
   
+  [data-theme="dark"] input:not([type="range"]),
   .dark input:not([type="range"]) {
+    background-color: #1e2235;
     border-color: #3d4266;
+  }
+
+  [data-theme="dark"] thead th,
+  .dark thead th {
+    color: #e2e8f0;
+  }
+
+  [data-theme="dark"] .slider-bound-label,
+  .dark .slider-bound-label {
+    color: #a0aec0;
   }
 }

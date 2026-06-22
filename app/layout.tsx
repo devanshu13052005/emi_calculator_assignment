@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
-import { AppNavbar } from '@/components/app-navbar'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({
@@ -13,11 +12,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'EMI Workspace',
-  description: 'Loan EMI Calculator — synced across tabs',
+  description: 'Loan EMI Calculator - synced across tabs',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
   },
 }
 

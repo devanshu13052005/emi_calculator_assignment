@@ -126,7 +126,8 @@ export function PrepaymentEMIMode() {
                 <input
                   type="number"
                   value={newMonth}
-                  onChange={(e) => setNewMonth(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => setNewMonth(Math.min(loan.tenure, Math.max(1, parseInt(e.target.value) || 1)))}
+                  onBlur={(e) => setNewMonth(Math.min(loan.tenure, Math.max(1, parseInt(e.target.value) || 1)))}
                   min="1"
                   max={loan.tenure}
                   className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -220,7 +221,7 @@ export function PrepaymentEMIMode() {
             </div>
             <div>
               <p className="text-muted-foreground mb-1">Original Interest</p>
-              <p className="font-semibold text-foreground">{formatCurrency(calculation.totalInterest)}</p>
+              <p className="font-semibold" style={{ color: 'var(--color-interest)' }}>{formatCurrency(calculation.totalInterest)}</p>
             </div>
             <div>
               <p className="text-muted-foreground mb-1">New Interest</p>

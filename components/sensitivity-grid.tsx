@@ -54,11 +54,11 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th className="p-2 border border-border bg-muted text-muted-foreground font-medium text-left">
+              <th className="p-2 border border-border bg-muted text-foreground dark:text-[#e2e8f0] font-medium text-left">
                 Rate \ Tenure
               </th>
               {tenureVariations.map((t) => (
-                <th key={t} className="p-2 border border-border bg-muted text-muted-foreground font-medium text-center">
+                <th key={t} className="p-2 border border-border bg-muted text-foreground dark:text-[#e2e8f0] font-medium text-center">
                   {formatTenure(t)} {t === tenure ? '(Current)' : ''}
                 </th>
               ))}
@@ -67,7 +67,7 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
           <tbody>
             {rateVariations.map((r) => (
               <tr key={r}>
-                <th className="p-2 border border-border bg-muted text-muted-foreground font-medium text-left">
+                <th className="p-2 border border-border bg-muted text-foreground dark:text-[#e2e8f0] font-medium text-left">
                   {r.toFixed(1)}% {r === rate ? '(Current)' : ''}
                 </th>
                 {tenureVariations.map((t) => {
@@ -80,8 +80,9 @@ export function SensitivityGrid({ principal, rate, tenure }: SensitivityGridProp
                       className={`p-2 border border-border text-center transition-colors ${
                         isCurrent 
                           ? 'bg-primary text-primary-foreground font-bold shadow-sm' 
-                          : 'hover:bg-muted/50 text-foreground'
+                          : 'hover:bg-muted/50'
                       }`}
+                      style={!isCurrent ? { color: 'var(--color-emi)' } : undefined}
                     >
                       {formatCurrency(emi)}
                     </td>

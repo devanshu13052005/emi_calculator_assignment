@@ -25,7 +25,7 @@ export function EMIOutputComponent({ output, title = 'EMI Summary' }: EMIOutputP
         {/* Monthly EMI */}
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <p className="text-sm font-medium text-muted-foreground mb-1">Monthly EMI</p>
-          <p className="text-2xl font-bold text-primary">
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-emi)' }}>
             {formatCurrency(output.emi)}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
@@ -49,7 +49,7 @@ export function EMIOutputComponent({ output, title = 'EMI Summary' }: EMIOutputP
           <p className="text-sm font-medium text-muted-foreground mb-1">
             Total Interest
           </p>
-          <p className="text-2xl font-bold text-destructive">
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-interest)' }}>
             {formatCurrency(output.totalInterest)}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
@@ -62,13 +62,13 @@ export function EMIOutputComponent({ output, title = 'EMI Summary' }: EMIOutputP
       <div className="bg-muted/50 rounded-lg p-4 space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Principal Amount:</span>
-          <span className="font-medium text-foreground">
+          <span className="font-medium" style={{ color: 'var(--color-principal)' }}>
             {formatCurrency(output.totalAmount - output.totalInterest)}
           </span>
         </div>
         <div className="flex justify-between text-sm border-t border-muted pt-2">
           <span className="text-muted-foreground">Interest Cost:</span>
-          <span className="font-medium text-foreground">
+          <span className="font-medium" style={{ color: 'var(--color-interest)' }}>
             {formatCurrency(output.totalInterest)}
           </span>
         </div>
